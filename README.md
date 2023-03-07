@@ -1,5 +1,4 @@
 # OpenSearch Rock
-----
 
 This repository contains the packaging metadata for creating an OpenSearch ROCK. This ROCK image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
 
