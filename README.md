@@ -1,7 +1,7 @@
-# Charmed OpenSearch Rock
+# OpenSearch Rock
 ----
 
-This repository contains the packaging metadata for creating a Charmed Kafka ROCK. This ROCK image is based on the [Charmed OpenSearch Snap](https://github.com/canonical/opensearch-snap)
+This repository contains the packaging metadata for creating an OpenSearch ROCK. This ROCK image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
 
 For more information on ROCKs, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
@@ -59,7 +59,6 @@ container_0_id=$(docker run \
   --name cm0 \
   opensearch:2.6.0)
 container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
-echo "Container0: cm0 -- ${container_0_ip}"
 
 # wait a bit for it to fully initialize
 sleep 15s
@@ -74,7 +73,6 @@ container_1_id=$(docker run \
     --name data1 \
     opensearch:2.6.0)
 container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
-echo "Container1: data1 -- ${container_1_ip}"
 
 # wait a bit for it to fully initialize
 sleep 15s
@@ -88,8 +86,6 @@ container_2_id=$(docker run \
     -p 9202:9200 \
     --name cm1 \
     opensearch:2.6.0)
-container_2_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_2_id}")
-echo "Container2: cm1 -- ${container_2_ip}"
 
 # wait a bit for it to fully initialize
 sleep 15s
@@ -104,9 +100,9 @@ And expect to see 3 nodes.
 **NOTE:** This deployment IS NOT suitable for production as this deployment disables and does NOT configure the security of OpenSearch.  
 
 ## License
-The Charmed Kafka ROCK is free software, distributed under the Apache
+The OpenSearch ROCK is free software, distributed under the Apache
 Software License, version 2.0. See
-[LICENSE](https://github.com/canonical/charmed-kafka-rock/blob/main/LICENSE)
+[LICENSE](https://github.com/canonical/opensearch-rock/blob/main/LICENSE)
 for more information.
 
 
