@@ -129,7 +129,7 @@ set_yaml_prop "${conf}" "plugins.security.disabled" "true"
 
 cat "${conf}"
 
-/usr/bin/setpriv \
+exec /usr/bin/setpriv \
   --clear-groups \
   --reuid opensearch \
   --regid opensearch \

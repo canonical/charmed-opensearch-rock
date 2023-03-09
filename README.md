@@ -96,7 +96,7 @@ curl -X GET http://127.0.1.1:9200/_nodes/
 ```
 And expect to see 3 nodes.
 
-**NOTE:** This deployment IS NOT suitable for production as this deployment disables and does NOT configure the security of OpenSearch.  
+**NOTE:** This deployment IS NOT suitable for production AS IS. As this deployment disables and does NOT configure the security of OpenSearch. Please use it as part of the Juju OpenSearch K8s charm once ready.
 
 ## License
 The OpenSearch ROCK is free software, distributed under the Apache
