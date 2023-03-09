@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: opensearch_rock_amd64
-          path: "opensearch_*_amd64.rock"
+          path: opensearch_*.rock
 
   test:
     name: Test Rock
@@ -72,6 +72,9 @@ jobs:
     needs:
       - build
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
       - name: Download rock file
         uses: actions/download-artifact@v3
         with:
