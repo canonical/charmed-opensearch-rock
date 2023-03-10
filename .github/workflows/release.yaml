@@ -60,4 +60,4 @@ jobs:
               oci-archive:charmed-opensearch_${version}_amd64.rock \
               docker-daemon:charmed-opensearch:${version}
           
-          docker push ghcr.io/canonical/charmed-opensearch:${version}
+          docker push ghcr.io/canonical/charmed-opensearch-rock:${version}
