@@ -1,6 +1,6 @@
-# OpenSearch Rock
+# Charmed OpenSearch Rock
 
-This repository contains the packaging metadata for creating an OpenSearch ROCK. This ROCK image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
+This repository contains the packaging metadata for creating a Charmed OpenSearch ROCK. This ROCK image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
 
 For more information on ROCKs, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
@@ -16,8 +16,8 @@ multipass shell rock-dev
 
 ### Clone Repository
 ```bash
-git clone https://github.com/canonical/opensearch-rock.git
-cd opensearch-rock
+git clone https://github.com/canonical/charmed-opensearch-rock.git
+cd charmed-opensearch-rock
 ```
 ### Installing Prerequisites
 ```bash
@@ -36,7 +36,7 @@ sudo lxd init --auto
 ```bash
 rockcraft pack
 
-sudo skopeo --insecure-policy copy oci-archive:opensearch_2.6.0_amd64.rock docker-daemon:opensearch:2.6.0
+sudo skopeo --insecure-policy copy oci-archive:charmed-opensearch_2.6.0_amd64.rock docker-daemon:opensearch:2.6.0
 
 docker run \
   -d --rm -it \
@@ -44,7 +44,7 @@ docker run \
   -e INITIAL_CM_NODES=cm0 \
   -p 9200:9200 \
   --name cm0 \
-  opensearch:2.6.0
+  charmed-opensearch:2.6.0
 ```
 
 ### Testing a multi nodes deployment:
@@ -56,7 +56,7 @@ container_0_id=$(docker run \
   -e INITIAL_CM_NODES=cm0 \
   -p 9200:9200 \
   --name cm0 \
-  opensearch:2.6.0)
+  charmed-opensearch:2.6.0)
 container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
 
 # wait a bit for it to fully initialize
@@ -70,7 +70,7 @@ container_1_id=$(docker run \
     -e NODE_ROLES=data,voting_only \
     -p 9201:9200 \
     --name data1 \
-    opensearch:2.6.0)
+    charmed-opensearch:2.6.0)
 container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
 
 # wait a bit for it to fully initialize
@@ -84,7 +84,7 @@ container_2_id=$(docker run \
     -e INITIAL_CM_NODES="cm0,cm1" \
     -p 9202:9200 \
     --name cm1 \
-    opensearch:2.6.0)
+    charmed-opensearch:2.6.0)
 
 # wait a bit for it to fully initialize
 sleep 15s
@@ -99,7 +99,7 @@ And expect to see 3 nodes.
 **NOTE:** This deployment IS NOT suitable for production AS IS. As this deployment disables and does NOT configure the security of OpenSearch. Please use it as part of the Juju OpenSearch K8s charm once ready.
 
 ## License
-The OpenSearch ROCK is free software, distributed under the Apache
+The Charmed OpenSearch ROCK is free software, distributed under the Apache
 Software License, version 2.0. See
 [LICENSE](https://github.com/canonical/opensearch-rock/blob/main/LICENSE)
 for more information.

@@ -40,7 +40,7 @@ jobs:
       - name: Download rock file
         uses: actions/download-artifact@v3
         with:
-          name: opensearch_rock_amd64
+          name: charmed_opensearch_rock_amd64
           path: .
 
       - name: Login to GitHub Container Registry
@@ -57,7 +57,7 @@ jobs:
           sudo skopeo \
               --insecure-policy \
               copy \
-              oci-archive:opensearch_${version}_amd64.rock \
-              docker-daemon:opensearch:${version}
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:charmed-opensearch:${version}
           
           docker push ghcr.io/canonical/charmed-opensearch:${version}

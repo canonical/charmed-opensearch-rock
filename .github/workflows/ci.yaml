@@ -39,8 +39,7 @@ jobs:
           sudo snap install --classic --channel edge rockcraft
           
           # jq and yq
-          sudo snap install jq
-          sudo snap install yq
+          sudo snap install jq yq
 
       - name: Upgrade linux deps with security updates
         run: |
@@ -62,8 +61,8 @@ jobs:
       - name: Upload built rock job artifact
         uses: actions/upload-artifact@v3
         with:
-          name: opensearch_rock_amd64
-          path: opensearch_*.rock
+          name: charmed_opensearch_rock_amd64
+          path: "charmed-opensearch_*.rock"
 
   test:
     name: Test Rock
@@ -78,7 +77,7 @@ jobs:
       - name: Download rock file
         uses: actions/download-artifact@v3
         with:
-          name: opensearch_rock_amd64
+          name: charmed_opensearch_rock_amd64
           path: .
           
       - name: Create local image
@@ -88,8 +87,8 @@ jobs:
           sudo skopeo \
               --insecure-policy \
               copy \
-              oci-archive:opensearch_${version}_amd64.rock \
-              docker-daemon:opensearch:${version}
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:charmed-opensearch:${version}
 
       - name: Start OpenSearch
         run: |
@@ -102,7 +101,7 @@ jobs:
               -e INITIAL_CM_NODES=cm0 \
               -p 9200:9200 \
               --name cm0 \
-              opensearch:"${version}")
+              charmed-opensearch:"${version}")
           container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
           
           # wait a bit for it to fully initialize
@@ -116,7 +115,7 @@ jobs:
               -e NODE_ROLES=data,voting_only \
               -p 9201:9200 \
               --name data1 \
-              opensearch:"${version}")
+              charmed-opensearch:"${version}")
           container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
           
           # wait a bit for it to fully initialize
@@ -130,7 +129,7 @@ jobs:
               -e INITIAL_CM_NODES="cm0,cm1" \
               -p 9202:9200 \
               --name cm1 \
-              opensearch:"${version}")
+              charmed-opensearch:"${version}")
           container_2_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_2_id}")
           
           # wait a bit for it to fully initialize
