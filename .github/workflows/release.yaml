@@ -54,10 +54,14 @@ jobs:
         run: |
           version="$(cat rockcraft.yaml | yq .version)"
           
+          base=($(cat rockcraft.yaml | yq .base | tr ":" "\n"))
+          base=$base[2]
+          tag_version="${version}-${base}_${{ env.RELEASE }}"
+          
           sudo skopeo \
               --insecure-policy \
               copy \
               oci-archive:charmed-opensearch_${version}_amd64.rock \
-              docker-daemon:charmed-opensearch:${version}
+              docker-daemon:ghcr.io/charmed-opensearch:${tag_version}
           
-          docker push ghcr.io/canonical/charmed-opensearch-rock:${version}
+          docker push ghcr.io/canonical/charmed-opensearch:${tag_version}
