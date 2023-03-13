@@ -1,0 +1,67 @@
+name: Build OpenSearch from source, run tests and release.
+
+env:
+  RELEASE: edge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-tests:
+    name: Build and Run Tests
+    uses: ./.github/workflows/ci.yaml
+
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - ci-tests
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install required dependencies
+        run: |
+          # docker
+          sudo snap install docker
+          sudo addgroup --system docker; sudo adduser $USER docker
+          newgrp docker
+          sudo snap disable docker; sudo snap enable docker
+
+          # skopeo
+          sudo snap install --devmode --channel edge skopeo
+          
+          # yq
+          sudo snap install yq
+
+      - name: Download rock file
+        uses: actions/download-artifact@v3
+        with:
+          name: charmed_opensearch_rock_amd64
+          path: .
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish rock to Store
+        run: |
+          version="$(cat rockcraft.yaml | yq .version)"
+          
+          base=($(cat rockcraft.yaml | yq .base | tr ":" "\n"))
+          base=$base[2]
+          tag_version="${version}-${base}_${{ env.RELEASE }}"
+          
+          sudo skopeo \
+              --insecure-policy \
+              copy \
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:ghcr.io/charmed-opensearch:${tag_version}
+          
+          docker push ghcr.io/canonical/charmed-opensearch:${tag_version}

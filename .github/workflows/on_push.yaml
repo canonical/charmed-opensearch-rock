@@ -1,0 +1,10 @@
+name: Build and Test
+on:
+  push:
+    branches:
+      - feature/**
+
+jobs:
+  build-run-tests:
+    name: Build and Run Tests
+    uses: ./.github/workflows/ci.yaml

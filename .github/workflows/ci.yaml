@@ -1,0 +1,164 @@
+name: Build and Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_call:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Rock
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      rock-file: ${{ steps.build-snap.outputs.rock }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup LXD
+        uses: canonical/setup-lxd@main
+
+      - name: Install required dependencies
+        run: |
+          # docker
+          sudo snap install docker
+          sudo addgroup --system docker; sudo adduser $USER docker
+          newgrp docker
+          sudo snap disable docker; sudo snap enable docker
+          
+          # skopeo
+          sudo snap install --devmode --channel edge skopeo
+          
+          # rockcraft
+          sudo snap install --classic --channel edge rockcraft
+          
+          # jq and yq
+          sudo snap install jq yq
+
+      - name: Upgrade linux deps with security updates
+        run: |
+          sudo apt-get update
+          
+          # install security updates
+          sudo apt-get -s dist-upgrade \
+            | grep "^Inst" \
+            | grep -i securi \
+            | awk -F " " {'print $2'} \
+            | xargs sudo apt-get install -y
+          
+          sudo apt-get autoremove -y
+
+      - id: build-rock
+        name: Build rock
+        uses: canonical/craft-actions/rockcraft-pack@main
+
+      - name: Upload built rock job artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: charmed_opensearch_rock_amd64
+          path: "charmed-opensearch_*.rock"
+
+  test:
+    name: Test Rock
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Download rock file
+        uses: actions/download-artifact@v3
+        with:
+          name: charmed_opensearch_rock_amd64
+          path: .
+          
+      - name: Create local image
+        run: |
+          version="$(cat rockcraft.yaml | yq .version)"
+          
+          sudo skopeo \
+              --insecure-policy \
+              copy \
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:charmed-opensearch:${version}
+
+      - name: Start OpenSearch
+        run: |
+          version="$(cat rockcraft.yaml | yq .version)"
+          
+          # create first cm_node container
+          container_0_id=$(docker run \
+              -d --rm -it \
+              -e NODE_NAME=cm0 \
+              -e INITIAL_CM_NODES=cm0 \
+              -p 9200:9200 \
+              --name cm0 \
+              charmed-opensearch:"${version}")
+          container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
+          
+          # wait a bit for it to fully initialize
+          sleep 15s
+          
+          # create data/voting_only node container
+          container_1_id=$(docker run \
+              -d --rm -it \
+              -e NODE_NAME=data1 \
+              -e SEED_HOSTS="${container_0_ip}" \
+              -e NODE_ROLES=data,voting_only \
+              -p 9201:9200 \
+              --name data1 \
+              charmed-opensearch:"${version}")
+          container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
+          
+          # wait a bit for it to fully initialize
+          sleep 15s
+
+          # create 2nd cm_node container
+          container_2_id=$(docker run \
+              -d --rm -it \
+              -e NODE_NAME=cm1 \
+              -e SEED_HOSTS="${container_0_ip},${container_1_ip}" \
+              -e INITIAL_CM_NODES="cm0,cm1" \
+              -p 9202:9200 \
+              --name cm1 \
+              charmed-opensearch:"${version}")
+          container_2_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_2_id}")
+          
+          # wait a bit for it to fully initialize
+          sleep 15s
+
+      - name: Ensure the cluster is reachable and nodes well joined
+        run: |
+          # test node
+          cluster_resp=$(curl -k -XGET http://localhost:9200)
+          echo -e "Cluster Response: \n ${cluster_resp}"
+          node_name=$(echo "${cluster_resp}" | jq -r .name)
+          if [ "${node_name}" != "cm0" ]; then
+              exit 1
+          fi
+
+          # query all nodes of cluster
+          successful_nodes="$(curl -k -XGET http://localhost:9200/_nodes | jq ._nodes.successful)"
+          if [ "${successful_nodes}" != 3 ]; then
+              exit 1
+          fi
+          
+          all_nodes="$(curl -X GET http://127.0.1.1:9200/_nodes/ | \
+            jq '.nodes | values[] | .name' | \
+            jq -s '. |= if . then sort else empty end' | \
+            jq -r '. | values[]' | \
+            paste -sd "," - \
+          )"
+          echo "All nodes: ${all_nodes}"
+          if [ "${all_nodes}" != "cm0,cm1,data1" ]; then
+              exit 1
+          fi
