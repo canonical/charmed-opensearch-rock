@@ -54,8 +54,8 @@ jobs:
         run: |
           version="$(cat rockcraft.yaml | yq .version)"
           
-          base=($(cat rockcraft.yaml | yq .base | tr ":" "\n"))
-          base="${base[2]}"
+          base="$(cat rockcraft.yaml | yq .base)"
+          base="${base#*:}"
           tag_version="${version}-${base}_${{ env.RELEASE }}"
           
           sudo skopeo \
