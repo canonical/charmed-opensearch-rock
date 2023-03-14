@@ -58,10 +58,12 @@ jobs:
           base="${base#*:}"
           tag_version="${version}-${base}_${{ env.RELEASE }}"
           
+          echo "Publishing charmed-opensearch:${tag_version}"
+          
           sudo skopeo \
               --insecure-policy \
               copy \
               oci-archive:charmed-opensearch_${version}_amd64.rock \
-              docker-daemon:ghcr.io/charmed-opensearch:${tag_version}
+              docker-daemon:ghcr.io/canonical/charmed-opensearch:${tag_version}
           
           docker push ghcr.io/canonical/charmed-opensearch:${tag_version}
