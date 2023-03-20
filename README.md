@@ -101,7 +101,7 @@ And expect to see 3 nodes.
 ## License
 The Charmed OpenSearch ROCK is free software, distributed under the Apache
 Software License, version 2.0. See
-[LICENSE](https://github.com/canonical/opensearch-rock/blob/main/LICENSE)
+[LICENSE](https://github.com/canonical/opensearch-rock/blob/main/licenses)
 for more information.
 
 
