@@ -20,6 +20,7 @@ services:
   start:
     override: replace
     command: /bin/start.sh
+    startup: enabled
     environment:
       OPENSEARCH_HOME: /
       OPENSEARCH_JAVA_HOME: /jdk
