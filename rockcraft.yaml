@@ -19,7 +19,7 @@ platforms: # The platforms this ROCK should be built on and run on
 services:
   start:
     override: replace
-    command: /bin/bash /bin/start.sh
+    command: /bin/start.sh
     environment:
       OPENSEARCH_HOME: /
       OPENSEARCH_JAVA_HOME: /jdk
