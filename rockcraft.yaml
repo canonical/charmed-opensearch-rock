@@ -19,7 +19,7 @@ platforms: # The platforms this ROCK should be built on and run on
 services:
   start:
     override: replace
-    command: /bin/start.sh
+    command: /usr/bin/start.sh
     startup: enabled
     environment:
       OPENSEARCH_HOME: /
@@ -68,6 +68,6 @@ parts:
     plugin: dump
     source: scripts
     organize:
-      start.sh: bin/start.sh
+      start.sh: usr/bin/start.sh
     stage:
       - bin/start.sh
