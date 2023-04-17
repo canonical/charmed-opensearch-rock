@@ -16,7 +16,10 @@ description: |
 platforms: # The platforms this ROCK should be built on and run on
   amd64:
 
-entrypoint: ["/bin/bash", "/bin/start.sh"]
+services:
+  start:
+    override: replace
+    command: "/bin/start.sh"
 
 env:
   - OPENSEARCH_HOME: /
