@@ -35,7 +35,7 @@ parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - opensearch/latest/edge
+      - opensearch/latest/candidate
       - yq
     stage-packages:
       - curl
