@@ -73,5 +73,5 @@ jobs:
               --insecure-policy \
               copy \
               oci-archive:charmed-opensearch_${version}_amd64.rock \
-              docker-daemon:ghcr.io/canonical/charmed-opensearch:${tag_version}
+              docker-daemon:ghcr.io/canonical/charmed-opensearch:${major_tag_version}
           docker push ghcr.io/canonical/charmed-opensearch:${major_tag_version}
