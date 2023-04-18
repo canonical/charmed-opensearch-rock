@@ -70,4 +70,4 @@ parts:
     organize:
       start.sh: usr/bin/start.sh
     stage:
-      - bin/start.sh
+      - usr/bin/start.sh
