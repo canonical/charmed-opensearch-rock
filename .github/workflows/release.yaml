@@ -1,7 +1,7 @@
 name: Build OpenSearch from source, run tests and release.
 
 env:
-  RELEASE: edge
+  RELEASE: candidate
 
 on:
   push:
@@ -67,3 +67,7 @@ jobs:
               docker-daemon:ghcr.io/canonical/charmed-opensearch:${tag_version}
           
           docker push ghcr.io/canonical/charmed-opensearch:${tag_version}
+          
+          # push major version tag
+          major_tag_version="${base%%.*}-${{ env.RELEASE }}"
+          docker push ghcr.io/canonical/charmed-opensearch:${major_tag_version}
