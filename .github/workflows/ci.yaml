@@ -37,7 +37,7 @@ jobs:
           sudo snap install --devmode --channel edge skopeo
           
           # rockcraft
-          sudo snap install --classic --channel edge rockcraft --revision=687
+          sudo snap install rockcraft --classic --edge --revision=687
           
           # jq and yq
           sudo snap install jq yq
@@ -55,9 +55,9 @@ jobs:
           
           sudo apt-get autoremove -y
 
-      - id: build-rock
-        name: Build rock
-        uses: canonical/craft-actions/rockcraft-pack@main
+      - name: Build rock
+        run: |
+          rockcraft pack --verbose
 
       - name: Upload built rock job artifact
         uses: actions/upload-artifact@v3
