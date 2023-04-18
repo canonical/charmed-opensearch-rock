@@ -37,7 +37,7 @@ jobs:
           sudo snap install --devmode --channel edge skopeo
           
           # rockcraft
-          sudo snap install --classic --channel edge rockcraft --rev=687
+          sudo snap install --classic --channel edge rockcraft --revision=687
           
           # jq and yq
           sudo snap install jq yq
