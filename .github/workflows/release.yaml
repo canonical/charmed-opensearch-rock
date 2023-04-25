@@ -1,7 +1,7 @@
 name: Build OpenSearch from source, run tests and release.
 
 env:
-  RELEASE: candidate
+  RELEASE: edge
 
 on:
   push:
@@ -56,10 +56,10 @@ jobs:
           
           base="$(cat rockcraft.yaml | yq .base)"
           base="${base#*:}"
+          
+          ### push full version to edge
           tag_version="${version}-${base}_${{ env.RELEASE }}"
-          
           echo "Publishing charmed-opensearch:${tag_version}"
-          
           sudo skopeo \
               --insecure-policy \
               copy \
@@ -67,8 +67,18 @@ jobs:
               docker-daemon:ghcr.io/canonical/charmed-opensearch:${tag_version}
           docker push ghcr.io/canonical/charmed-opensearch:${tag_version}
           
-          # push major version tag
-          major_tag_version="${version%%.*}-${{ env.RELEASE }}"
+          ### push full version to candidate
+          tag_version="${version}-${base}_candidate"
+          echo "Publishing charmed-opensearch:${tag_version}"
+          sudo skopeo \
+              --insecure-policy \
+              copy \
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:ghcr.io/canonical/charmed-opensearch:${tag_version}
+          docker push ghcr.io/canonical/charmed-opensearch:${tag_version}
+          
+          # push major version to candidate
+          major_tag_version="${version%%.*}-candidate"
           sudo skopeo \
               --insecure-policy \
               copy \
