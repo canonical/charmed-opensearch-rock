@@ -8,9 +8,9 @@ version: '2.6.0' # just for humans. Semantic versioning is recommended
 
 summary: 'Charmed OpenSearch ROCK OCI.'
 description: |
-  OpenSearch is a community-driven, Apache 2.0-licensed open source search and 
-  analytics suite that makes it easy to ingest, search, visualize, and analyze data. 
-  Developers build with OpenSearch for use cases such as application search, 
+  OpenSearch is a community-driven, Apache 2.0-licensed open source search and
+  analytics suite that makes it easy to ingest, search, visualize, and analyze data.
+  Developers build with OpenSearch for use cases such as application search,
   log analytics, data observability, data ingestion, and more.
 
 platforms: # The platforms this ROCK should be built on and run on
@@ -19,11 +19,11 @@ platforms: # The platforms this ROCK should be built on and run on
 entrypoint: ["/bin/bash", "/bin/start.sh"]
 
 env:
-  - OPENSEARCH_HOME: /
-  - OPENSEARCH_JAVA_HOME: /jdk
-  - OPENSEARCH_PATH_CONF: /config
+  - OPENSEARCH_HOME: /usr/share/opensearch
+  - OPENSEARCH_JAVA_HOME: /usr/share/opensearch/jdk
+  - OPENSEARCH_PATH_CONF: /etc/opensearch/config
   - OPENSEARCH_TMPDIR: /opensearch-tmp
-  - OPENSEARCH_PLUGINS: /plugins
+  - OPENSEARCH_PLUGINS: /usr/share/opensearch/plugins
   - CLUSTER_NAME: opensearch-dev
   - NODE_NAME: node-0
   - NODE_ROLES: cluster_manager,data
@@ -42,8 +42,8 @@ parts:
       - util-linux
     override-prime: |
       craftctl default
-      
-      mkdir -p data
+
+      mkdir -p var/lib/opensearch/data
       mkdir -p opensearch-tmp
 
   non-root-user:
@@ -55,11 +55,13 @@ parts:
       useradd -R ${CRAFT_OVERLAY} -M -r -g opensearch -u 1000 opensearch
     override-prime: |
       craftctl default
-      
+
       # Give permission ot the required folders
-      chown -R 1000:1000 data/ logs/ config/ opensearch-tmp/ jdk/ modules/ plugins/ performance-analyzer-rca/
-      chown -R 1000:1000 lib/tools lib/*.jar
-      chown -R 1000:1000 bin/opensearch*
+      chown -R 1000:1000 var/lib/opensearch/data/ var/log/opensearch/logs/ etc/opensearch/config/  \
+          opensearch-tmp/ usr/share/opensearch/jdk/ usr/share/opensearch/modules/  \
+          usr/share/opensearch/plugins/ usr/share/opensearch/performance-analyzer-rca/
+      chown -R 1000:1000 usr/share/opensearch/lib/tools usr/share/opensearch/lib/*.jar
+      chown -R 1000:1000 usr/share/opensearch/bin/opensearch*
 
   entry:
     plugin: dump
