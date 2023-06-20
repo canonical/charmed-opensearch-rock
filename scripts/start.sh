@@ -2,6 +2,13 @@
 
 set -eux
 
+CLUSTER_NAME="${CLUSTER_NAME:-opensearch-dev}"
+NODE_NAME="${NODE_NAME:-node-0}"
+NODE_ROLES="${NODE_ROLES:-cluster_manager,data}"
+INITIAL_CM_NODES="${INITIAL_CM_NODES:-}"
+NETWORK_HOST="${NETWORK_HOST:-_local_,_site_}"
+SEED_HOSTS="${SEED_HOSTS:-}"
+
 
 function set_yaml_prop() {
     local target_file="${1}"

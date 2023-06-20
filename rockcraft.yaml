@@ -4,7 +4,7 @@ name: charmed-opensearch  # the name of your ROCK
 base: ubuntu:22.04  # the base environment for this ROCK
 license: Apache-2.0
 
-version: '2.6.0' # just for humans. Semantic versioning is recommended
+version: '2.7.0' # just for humans. Semantic versioning is recommended
 
 summary: 'Charmed OpenSearch ROCK OCI.'
 description: |
@@ -16,26 +16,24 @@ description: |
 platforms: # The platforms this ROCK should be built on and run on
   amd64:
 
-entrypoint: ["/bin/bash", "/bin/start.sh"]
-
-env:
-  - OPENSEARCH_HOME: /
-  - OPENSEARCH_JAVA_HOME: /jdk
-  - OPENSEARCH_PATH_CONF: /config
-  - OPENSEARCH_TMPDIR: /opensearch-tmp
-  - OPENSEARCH_PLUGINS: /plugins
-  - CLUSTER_NAME: opensearch-dev
-  - NODE_NAME: node-0
-  - NODE_ROLES: cluster_manager,data
-  - INITIAL_CM_NODES: ""
-  - NETWORK_HOST: _local_,_site_
-  - SEED_HOSTS: ""
+services:
+  opensearch:
+    override: replace
+    startup: enabled
+    summary: Start OpenSearch
+    command: "/bin/bash /bin/start.sh"
+    environment:
+      OPENSEARCH_HOME: /
+      OPENSEARCH_JAVA_HOME: /jdk
+      OPENSEARCH_PATH_CONF: /config
+      OPENSEARCH_TMPDIR: /tmp
+      OPENSEARCH_PLUGINS: /plugins
 
 parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - opensearch/latest/candidate
+      - opensearch/2/candidate
       - yq
     stage-packages:
       - curl
@@ -44,7 +42,7 @@ parts:
       craftctl default
       
       mkdir -p data
-      mkdir -p opensearch-tmp
+      mkdir -p extensions
 
   non-root-user:
     plugin: nil
@@ -57,7 +55,7 @@ parts:
       craftctl default
       
       # Give permission ot the required folders
-      chown -R 1000:1000 data/ logs/ config/ opensearch-tmp/ jdk/ modules/ plugins/ performance-analyzer-rca/
+      chown -R 1000:1000 data/ logs/ config/ jdk/ modules/ plugins/ extensions/ performance-analyzer-rca/
       chown -R 1000:1000 lib/tools lib/*.jar
       chown -R 1000:1000 bin/opensearch*
 
