@@ -152,7 +152,7 @@ jobs:
               exit 1
           fi
           
-          all_nodes="$(curl -X GET http://127.0.1.1:9200/_nodes/ | \
+          all_nodes="$(curl -XGET http://127.0.1.1:9200/_nodes/ | \
             jq '.nodes | values[] | .name' | \
             jq -s '. |= if . then sort else empty end' | \
             jq -r '. | values[]' | \
