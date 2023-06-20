@@ -139,7 +139,7 @@ jobs:
       - name: Ensure the cluster is reachable and nodes well joined
         run: |
           # test node
-          cluster_resp=$(curl -k -XGET http://localhost:9200)
+          cluster_resp=$(curl -k -XGET http://127.0.1.1:9200)
           echo -e "Cluster Response: \n ${cluster_resp}"
           node_name=$(echo "${cluster_resp}" | jq -r .name)
           if [ "${node_name}" != "cm0" ]; then
@@ -147,7 +147,7 @@ jobs:
           fi
 
           # query all nodes of cluster
-          successful_nodes="$(curl -k -XGET http://localhost:9200/_nodes | jq ._nodes.successful)"
+          successful_nodes="$(curl -k -XGET http://127.0.1.1:9200/_nodes | jq ._nodes.successful)"
           if [ "${successful_nodes}" != 3 ]; then
               exit 1
           fi
