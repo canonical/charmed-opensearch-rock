@@ -41,8 +41,21 @@ parts:
     override-prime: |
       craftctl default
       
+      # opensearch
       mkdir -p data
       mkdir -p extensions
+      
+      # enable security monitoring
+      rocks=usr/share/rocks/
+      mkdir -p ${rocks}
+      
+      ## for deb packages
+      dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
+      
+      ## for snap packages
+      cp snap.yq/manifest.yaml ${rocks}
+      cp snap.yq/snapcraft.yaml ${rocks}
+      
 
   non-root-user:
     plugin: nil
