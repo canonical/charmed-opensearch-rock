@@ -34,9 +34,10 @@ parts:
     plugin: nil
     stage-snaps:
       - opensearch/2/candidate
-      - yq
     stage-packages:
       - curl
+      - python3
+      - python3-yaml
       - util-linux
     override-prime: |
       craftctl default
@@ -53,8 +54,8 @@ parts:
       dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
       
       ## for snap packages
-      cp snap.yq/manifest.yaml ${rocks}
-      cp snap.yq/snapcraft.yaml ${rocks}
+      cp snap.opensearch/manifest.yaml ${rocks}
+      cp snap.opensearch/snapcraft.yaml ${rocks}
       
 
   non-root-user:
@@ -77,5 +78,7 @@ parts:
     source: scripts
     organize:
       start.sh: bin/start.sh
+      set_conf.py: bin/set_conf.py
     stage:
       - bin/start.sh
+      - bin/set_conf.py
