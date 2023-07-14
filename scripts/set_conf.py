@@ -40,9 +40,8 @@ if __name__ == "__main__":
 
     data = load(args.file)
 
-    print(args.value)
-
     if args.value.startswith("[") and args.value.endswith("]"):
+        # convert a string represented List into an actual python list
         data[args.key] = ast.literal_eval(args.value)
     else:
         data[args.key] = args.value
