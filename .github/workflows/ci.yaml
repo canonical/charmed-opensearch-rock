@@ -91,6 +91,12 @@ jobs:
               oci-archive:charmed-opensearch_${version}_amd64.rock \
               docker-daemon:charmed-opensearch:${version}
 
+      - name: Setup the required system configs
+        run: |
+          sudo sysctl -w vm.swappiness=0
+          sudo sysctl -w vm.max_map_count=262144
+          sudo sysctl -w net.ipv4.tcp_retries2=5
+
       - name: Start OpenSearch
         run: |
           version="$(cat rockcraft.yaml | yq .version)"
@@ -106,7 +112,7 @@ jobs:
           container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
           
           # wait a bit for it to fully initialize
-          sleep 15s
+          sleep 30s
           
           # create data/voting_only node container
           container_1_id=$(docker run \
@@ -120,7 +126,7 @@ jobs:
           container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
           
           # wait a bit for it to fully initialize
-          sleep 15s
+          sleep 30s
 
           # create 2nd cm_node container
           container_2_id=$(docker run \
@@ -134,7 +140,7 @@ jobs:
           container_2_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_2_id}")
           
           # wait a bit for it to fully initialize
-          sleep 15s
+          sleep 30s
 
       - name: Ensure the cluster is reachable and nodes well joined
         run: |
