@@ -153,10 +153,6 @@ jobs:
           fi
 
           # query all nodes of cluster
-          curl -sk -XGET http://127.0.0.1:9200/_cat/nodes
-          curl -sk -XGET http://127.0.0.1:9200/_nodes | jq ._nodes
-          
-          
           successful_nodes="$(curl -sk -XGET http://127.0.0.1:9200/_nodes | jq ._nodes.successful)"
           if [ "${successful_nodes}" != 3 ]; then
               exit 1
