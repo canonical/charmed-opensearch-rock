@@ -37,7 +37,7 @@ cd charmed-opensearch-rock
 ```
 #### Installing Prerequisites
 ```bash
-sudo snap install rockcraft --edge --classic --revision=687
+sudo snap install rockcraft --edge --classic
 sudo snap install docker
 sudo snap install lxd
 sudo snap install skopeo --edge --devmode

@@ -4,7 +4,7 @@ name: charmed-opensearch  # the name of your ROCK
 base: ubuntu:22.04  # the base environment for this ROCK
 license: Apache-2.0
 
-version: '2.9.0' # just for humans. Semantic versioning is recommended
+version: '2.10.0' # just for humans. Semantic versioning is recommended
 
 summary: 'Charmed OpenSearch ROCK OCI.'
 description: |
@@ -23,11 +23,23 @@ services:
     summary: Start OpenSearch
     command: "/bin/bash /bin/start.sh"
     environment:
-      OPENSEARCH_HOME: /
-      OPENSEARCH_JAVA_HOME: /jdk
-      OPENSEARCH_PATH_CONF: /config
-      OPENSEARCH_TMPDIR: /tmp
-      OPENSEARCH_PLUGINS: /plugins
+      OPS_ROOT: /opt/opensearch
+
+      OPENSEARCH_HOME: /usr/share/opensearch
+      OPENSEARCH_JAVA_HOME: /usr/share/opensearch/jdk
+      OPENSEARCH_BIN: /usr/share/opensearch/bin
+      OPENSEARCH_LIB: /usr/share/opensearch/lib
+      OPENSEARCH_PLUGINS: /usr/share/opensearch/plugins
+      OPENSEARCH_MODULES: /usr/share/opensearch/modules
+
+      OPENSEARCH_PATH_CONF: /etc/opensearch
+      OPENSEARCH_PATH_CERTS: /etc/opensearch/certificates
+
+      OPENSEARCH_VARLIB: /var/lib/opensearch
+      OPENSEARCH_TMPDIR: /usr/share/tmp
+      OPENSEARCH_VARLOG: /var/log/opensearch
+
+      KNN_LIB_DIR: /usr/share/opensearch/plugins/opensearch-knn/lib
 
 parts:
   opensearch-snap:
@@ -67,11 +79,10 @@ parts:
       useradd -R ${CRAFT_OVERLAY} -M -r -g opensearch -u 1000 opensearch
     override-prime: |
       craftctl default
-      
+
       # Give permission ot the required folders
-      chown -R 1000:1000 data/ logs/ config/ jdk/ modules/ plugins/ extensions/ performance-analyzer-rca/
-      chown -R 1000:1000 lib/tools lib/*.jar
-      chown -R 1000:1000 bin/opensearch*
+      mkdir -p var/lib/opensearch usr/share/tmp var/log/opensearch
+      chown -R 1000:1000 etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
 
   entry:
     plugin: dump

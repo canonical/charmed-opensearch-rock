@@ -81,9 +81,10 @@ fi
 
 set_yaml_prop "${conf}" "network.host" "$(network_host)"
 set_yaml_prop "${conf}" "discovery.seed_hosts" "$(seed_hosts)"
-set_yaml_prop "${conf}" "path.data" "/data"
-set_yaml_prop "${conf}" "path.logs" "/logs"
+set_yaml_prop "${conf}" "path.data" "${OPENSEARCH_VARLIB}/data"
+set_yaml_prop "${conf}" "path.logs" "${OPENSEARCH_VARLOG}/logs"
 set_yaml_prop "${conf}" "plugins.security.disabled" "true"
+sed -i "s@=logs/@=${OPENSEARCH_VARLOG}/@" "${OPENSEARCH_PATH_CONF}/jvm.options"
 
 cat "${conf}"
 
@@ -91,4 +92,4 @@ exec /usr/bin/setpriv \
   --clear-groups \
   --reuid opensearch \
   --regid opensearch \
-  -- /bin/opensearch
+  -- "${OPENSEARCH_BIN}"/opensearch
