@@ -24,9 +24,10 @@ services:
     command: "/bin/bash /bin/start.sh"
     environment:
       OPS_ROOT: /opt/opensearch
-
       OPENSEARCH_HOME: /usr/share/opensearch
-      OPENSEARCH_JAVA_HOME: /usr/share/opensearch/jdk
+
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      OPENSEARCH_JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       OPENSEARCH_BIN: /usr/share/opensearch/bin
       OPENSEARCH_LIB: /usr/share/opensearch/lib
       OPENSEARCH_PLUGINS: /usr/share/opensearch/plugins
