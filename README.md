@@ -1,27 +1,27 @@
-## Introduction to Charmed OpenSearch ROCK (OCI Image)
+## Introduction to Charmed OpenSearch Rock (OCI Image)
 
 [OpenSearch](https://opensearch.org/) is an open-source search and analytics suite. 
 Developers build solutions for search, data observability, data ingestion and more using OpenSearch. 
 OpenSearch is offered under the Apache Software Licence, version 2.0.
 
-[Charmed OpenSearch ROCK](https://github.com/canonical/charmed-opensearch-rock/pkgs/container/charmed-opensearch) 
+[Charmed OpenSearch rock](https://github.com/canonical/charmed-opensearch-rock/pkgs/container/charmed-opensearch) 
 is an Open Container Initiative (OCI) image derived from the [Charmed OpenSearch Snap](https://snapcraft.io/opensearch). 
-The tool used to create this ROCK is called [Rockcraft](https://canonical-rockcraft.readthedocs-hosted.com/en/latest/index.html).
+The tool used to create this rock is called [Rockcraft](https://canonical-rockcraft.readthedocs-hosted.com/en/latest/index.html).
 
-This repository contains the packaging metadata for creating a Charmed OpenSearch ROCK. This ROCK image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
+This repository contains the packaging metadata for creating a Charmed OpenSearch rock. This rock image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
 
-For more information on ROCKs, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
+For more information on rocks, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
 ## Version
-The Charmed OpenSearch ROCK release aligns with the [OpenSearch upstream major version](https://opensearch.org/docs/latest/version-history/) naming. OpenSearch releases major versions such as 1.0, 2.0, and so on.
+The Charmed OpenSearch rock release aligns with the [OpenSearch upstream major version](https://opensearch.org/docs/latest/version-history/) naming. OpenSearch releases major versions such as 1.0, 2.0, and so on.
 
 ## Release
-Charmed OpenSearch [ROCK Release Notes](https://discourse.charmhub.io/t/release-notes-charmed-opensearch-2-rock/10278).
+Charmed OpenSearch [Rock Release Notes](https://discourse.charmhub.io/t/release-notes-charmed-opensearch-2-rock/10278).
 
 
-## ROCK Usage
-### Building the ROCK
-The steps outlined below are based on the assumption that you are building the ROCK with the latest LTS of Ubuntu.  
+## Rock Usage
+### Building the Rock
+The steps outlined below are based on the assumption that you are building the rock with the latest LTS of Ubuntu.  
 If you are using another version of Ubuntu or another operating system, the process may be different.
 To avoid any issue with other operating systems you can simply build the image with [multipass](https://multipass.run/):
 ```bash
@@ -48,7 +48,7 @@ sudo usermod -aG docker $USER
 sudo lxd init --auto
 ```
 *_NOTE:_* You will need to open a new shell for the group change to take effect (i.e. `su - $USER`)
-#### Packing and Running the ROCK
+#### Packing and Running the Rock
 ```bash
 rockcraft pack
 
@@ -120,14 +120,14 @@ And expect to see 3 nodes.
 **NOTE:** This deployment IS NOT suitable for production AS IS. As this deployment disables and does NOT configure the security of OpenSearch. Please use it as part of the Juju OpenSearch K8s charm once ready.
 
 ## License
-The Charmed OpenSearch ROCK is free software, distributed under the Apache
+The Charmed OpenSearch rock is free software, distributed under the Apache
 Software License, version 2.0. See
 [LICENSE](https://github.com/canonical/opensearch-rock/blob/main/licenses)
 for more information.
 
 
 ## Security, Bugs and feature request
-If you find a bug in this ROCK or want to request a specific feature, here are the useful links:
+If you find a bug in this rock or want to request a specific feature, here are the useful links:
 - Raise the issue or feature request in the [Canonical GitHub repository](https://github.com/canonical/charmed-opensearch-rock/issues).
 - Meet the community and chat with us if there are issues and feature requests in our [Mattermost Channel](https://chat.charmhub.io/charmhub/channels/data-platform).
 
@@ -138,4 +138,4 @@ Please see the [Juju SDK docs](https://juju.is/docs/sdk) for guidelines on enhan
 OpenSearch is a registered trademark of Amazon Web Services. Other trademarks are property of their respective owners. Charmed OpenSearch is not sponsored, endorsed, or affiliated with Amazon Web Services.
 
 ## License
-The Charmed OpenSearch ROCK, Charmed OpenSearch Snap, and Charmed OpenSearch Operator are free software, distributed under the [Apache Software License, version 2.0](https://github.com/canonical/charmed-opensearch-rock/blob/main/licenses/LICENSE-rock). They install and operate OpenSearch, which is also licensed under the [Apache Software License, version 2.0](https://github.com/canonical/charmed-opensearch-rock/blob/main/licenses/LICENSE-opensearch).
+The Charmed OpenSearch rock, Charmed OpenSearch Snap, and Charmed OpenSearch Operator are free software, distributed under the [Apache Software License, version 2.0](https://github.com/canonical/charmed-opensearch-rock/blob/main/licenses/LICENSE-rock). They install and operate OpenSearch, which is also licensed under the [Apache Software License, version 2.0](https://github.com/canonical/charmed-opensearch-rock/blob/main/licenses/LICENSE-opensearch).
