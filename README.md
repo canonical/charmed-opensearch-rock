@@ -1,4 +1,6 @@
 ## Introduction to Charmed OpenSearch Rock (OCI Image)
+[![Build and Test](https://github.com/canonical/charmed-opensearch-rock/actions/workflows/ci.yaml/badge.svg)](https://github.com/canonical/charmed-opensearch-rock/actions/workflows/ci.yaml)
+[![Publish](https://github.com/canonical/charmed-opensearch-rock/actions/workflows/release.yaml/badge.svg)](https://github.com/canonical/charmed-opensearch-rock/actions/workflows/release.yaml)
 
 [OpenSearch](https://opensearch.org/) is an open-source search and analytics suite. 
 Developers build solutions for search, data observability, data ingestion and more using OpenSearch. 
