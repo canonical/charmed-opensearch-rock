@@ -4,7 +4,7 @@ name: charmed-opensearch  # the name of your ROCK
 base: ubuntu:22.04  # the base environment for this ROCK
 license: Apache-2.0
 
-version: '2.10.0' # just for humans. Semantic versioning is recommended
+version: '2.12.0' # just for humans. Semantic versioning is recommended
 
 summary: 'Charmed OpenSearch ROCK OCI.'
 description: |
@@ -26,8 +26,8 @@ services:
       OPS_ROOT: /opt/opensearch
       OPENSEARCH_HOME: /usr/share/opensearch
 
-      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-      OPENSEARCH_JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-21-openjdk-amd64
+      OPENSEARCH_JAVA_HOME: /usr/lib/jvm/java-21-openjdk-amd64
       OPENSEARCH_BIN: /usr/share/opensearch/bin
       OPENSEARCH_LIB: /usr/share/opensearch/lib
       OPENSEARCH_PLUGINS: /usr/share/opensearch/plugins
@@ -46,7 +46,7 @@ parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - opensearch/2/candidate
+      - opensearch/2/edge
     stage-packages:
       - curl
       - python3
