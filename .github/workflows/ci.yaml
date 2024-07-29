@@ -28,7 +28,7 @@ jobs:
       - name: Install required dependencies
         run: |
           # docker
-          sudo snap install docker
+          sudo snap install docker --channel=latest/stable
           sudo addgroup --system docker; sudo adduser $USER docker
           newgrp docker
           sudo snap disable docker; sudo snap enable docker
@@ -80,6 +80,18 @@ jobs:
         with:
           name: charmed_opensearch_rock_amd64
           path: .
+
+      - name: Install required dependencies
+        run: |
+          # docker
+          sudo snap install docker --channel=latest/stable
+          sudo addgroup --system docker; sudo adduser $USER docker
+          newgrp docker
+          sudo snap disable docker; sudo snap enable docker
+
+          # skopeo
+          sudo snap install --devmode --channel edge skopeo
+          sudo snap install yq
           
       - name: Create local image
         run: |
