@@ -47,9 +47,9 @@ jobs:
       - build
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download rock file
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: charmed_opensearch_rock_amd64
           path: .
