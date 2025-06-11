@@ -48,7 +48,7 @@ parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - opensearch/2/edge
+      - opensearch/2/edge/dpe-7400
     stage-packages:
       - base-files
       - python3-venv
