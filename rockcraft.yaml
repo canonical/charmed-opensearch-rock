@@ -1,0 +1,94 @@
+# Copyright 2023 Canonical Ltd.
+# See LICENSE file for licensing details.
+name: charmed-opensearch # the name of your ROCK
+base: ubuntu@24.04 # the base environment for this ROCK
+license: Apache-2.0
+
+version: '2.19.1' # just for humans. Semantic versioning is recommended
+
+summary: 'Charmed OpenSearch ROCK OCI.'
+description: |
+  OpenSearch is a community-driven, Apache 2.0-licensed open source search and 
+  analytics suite that makes it easy to ingest, search, visualize, and analyze data. 
+  Developers build with OpenSearch for use cases such as application search, 
+  log analytics, data observability, data ingestion, and more.
+
+platforms: # The platforms this ROCK should be built on and run on
+  amd64:
+
+run_user: _daemon_
+
+services:
+  opensearch:
+    override: replace
+    startup: enabled
+    summary: Start OpenSearch
+    command: '/bin/bash /bin/start.sh'
+    environment:
+      OPS_ROOT: /opt/opensearch
+      OPENSEARCH_HOME: /usr/share/opensearch
+
+      JAVA_HOME: /usr/lib/jvm/java-21-openjdk-amd64
+      OPENSEARCH_JAVA_HOME: /usr/lib/jvm/java-21-openjdk-amd64
+      OPENSEARCH_BIN: /usr/share/opensearch/bin
+      OPENSEARCH_LIB: /usr/share/opensearch/lib
+      OPENSEARCH_PLUGINS: /usr/share/opensearch/plugins
+      OPENSEARCH_MODULES: /usr/share/opensearch/modules
+
+      OPENSEARCH_PATH_CONF: /etc/opensearch
+      OPENSEARCH_PATH_CERTS: /etc/opensearch/certificates
+
+      OPENSEARCH_VARLIB: /var/lib/opensearch
+      OPENSEARCH_TMPDIR: /usr/share/tmp
+      OPENSEARCH_VARLOG: /var/log/opensearch
+
+      KNN_LIB_DIR: /usr/share/opensearch/plugins/opensearch-knn/lib
+
+parts:
+  opensearch-snap:
+    plugin: nil
+    stage-snaps:
+      - opensearch/2/edge
+    stage-packages:
+      - base-files
+      - python3-venv
+      - python3-yaml
+      - curl
+      - util-linux
+    override-prime: |
+      craftctl default
+
+      # opensearch
+      mkdir -p data
+      mkdir -p extensions
+
+      # enable security monitoring
+      rocks=usr/share/rocks/
+      mkdir -p ${rocks}
+
+      ## for deb packages
+      dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
+
+      ## for snap packages
+      cp snap.opensearch/manifest.yaml ${rocks}
+      cp snap.opensearch/snapcraft.yaml ${rocks}
+
+  non-root-user:
+    plugin: nil
+    after: [opensearch-snap]
+    override-prime: |
+      craftctl default
+
+      # Give permission ot the required folders
+      mkdir -p var/lib/opensearch usr/share/tmp var/log/opensearch
+      chown -R 584792:584792 etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
+
+  entry:
+    plugin: dump
+    source: scripts
+    organize:
+      start.sh: usr/bin/start.sh
+      set_conf.py: usr/bin/set_conf.py
+    stage:
+      - usr/bin/start.sh
+      - usr/bin/set_conf.py

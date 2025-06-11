@@ -1,0 +1,228 @@
+name: Build and Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_call:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Rock
+    runs-on: [self-hosted, linux, X64, jammy, large]
+    timeout-minutes: 30
+    outputs:
+      rock-file: ${{ steps.build-snap.outputs.rock }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup LXD
+        uses: canonical/setup-lxd@main
+
+      - name: Install required dependencies
+        run: |
+          # rockcraft
+          sudo snap install rockcraft --classic --edge
+
+      - name: Build rock
+        run: |
+          rockcraft pack --verbose
+      - name: Upload built rock job artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: charmed_opensearch_rock_amd64
+          path: "charmed-opensearch_*.rock"
+
+  scan:
+    name: Trivy scan and sbom generation
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    needs:
+      - build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Download rock file
+        uses: actions/download-artifact@v4
+        with:
+          name: charmed_opensearch_rock_amd64
+          path: .
+
+      - name: Install required dependencies
+        run: |
+          # docker
+          # FIXME: v27.2.0 reports "...client version 1.22 is too old..." when trying to copy the
+          # rock to the local repository --revision=2932
+          sudo snap install docker --channel=latest/stable --revision=2932
+          sudo addgroup --system docker; sudo adduser $USER docker
+          newgrp docker
+          sudo snap disable docker; sudo snap enable docker
+          # skopeo
+          sudo snap install --devmode --channel edge skopeo
+          sudo snap install yq
+          
+      - name: Create local image
+        run: |
+          version="$(cat rockcraft.yaml | yq .version)"
+          
+          sudo skopeo \
+              --insecure-policy \
+              copy \
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:trivy/charmed_opensearch_rock_amd64:test
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: 'trivy/charmed_opensearch_rock_amd64:test'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'MEDIUM,HIGH,CRITICAL'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: 'image'
+          format: 'spdx-json'
+          output: 'dependency-results.sbom.json'
+          image-ref: 'trivy/charmed_opensearch_rock_amd64:test'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+          severity: "MEDIUM,HIGH,CRITICAL"
+          scanners: "vuln"
+      
+      - name: Upload trivy report as a Github artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-sbom-report
+          path: '${{ github.workspace }}/dependency-results.sbom.json'
+          retention-days: 90
+
+  test:
+    name: Test Rock
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Download rock file
+        uses: actions/download-artifact@v4
+        with:
+          name: charmed_opensearch_rock_amd64
+          path: .
+
+      - name: Install required dependencies
+        run: |
+          # docker
+          # FIXME: v27.2.0 reports "...client version 1.22 is too old..." when trying to copy the
+          # rock to the local repository --revision=2932
+          sudo snap install docker --channel=latest/stable --revision=2932
+          sudo addgroup --system docker; sudo adduser $USER docker
+          newgrp docker
+          sudo snap disable docker; sudo snap enable docker
+
+          # skopeo
+          sudo snap install --devmode --channel edge skopeo
+          sudo snap install yq
+
+      - name: Create local image
+        run: |
+          version="$(cat rockcraft.yaml | yq .version)"
+
+          sudo skopeo \
+              --insecure-policy \
+              copy \
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:charmed-opensearch:${version}
+
+      - name: Setup the required system configs
+        run: |
+          sudo sysctl -w vm.swappiness=0
+          sudo sysctl -w vm.max_map_count=262144
+          sudo sysctl -w net.ipv4.tcp_retries2=5
+
+      - name: Start OpenSearch
+        run: |
+          version="$(cat rockcraft.yaml | yq .version)"
+          
+          # create first cm_node container
+          container_0_id=$(docker run \
+              -d --rm -it \
+              -e NODE_NAME=cm0 \
+              -e INITIAL_CM_NODES=cm0 \
+              -p 9200:9200 \
+              --name cm0 \
+              charmed-opensearch:"${version}")
+          container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
+          
+          # wait a bit for it to fully initialize
+          sleep 30s
+          
+          # create data/voting_only node container
+          container_1_id=$(docker run \
+              -d --rm -it \
+              -e NODE_NAME=data1 \
+              -e SEED_HOSTS="${container_0_ip}" \
+              -e NODE_ROLES=data,voting_only \
+              -p 9201:9200 \
+              --name data1 \
+              charmed-opensearch:"${version}")
+          container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
+          
+          # wait a bit for it to fully initialize
+          sleep 30s
+
+          # create 2nd cm_node container
+          container_2_id=$(docker run \
+              -d --rm -it \
+              -e NODE_NAME=cm1 \
+              -e SEED_HOSTS="${container_0_ip},${container_1_ip}" \
+              -e INITIAL_CM_NODES="cm0,cm1" \
+              -p 9202:9200 \
+              --name cm1 \
+              charmed-opensearch:"${version}")
+          container_2_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_2_id}")
+          
+          # wait a bit for it to fully initialize
+          sleep 30s
+
+      - name: Ensure the cluster is reachable and nodes well joined
+        run: |
+          # test node
+          cluster_resp=$(curl -sk -XGET http://127.0.0.1:9200)
+          echo -e "Cluster Response: \n ${cluster_resp}"
+          node_name=$(echo "${cluster_resp}" | jq -r .name)
+          if [ "${node_name}" != "cm0" ]; then
+              exit 1
+          fi
+
+          # query all nodes of cluster
+          successful_nodes="$(curl -sk -XGET http://127.0.0.1:9200/_nodes | jq ._nodes.successful)"
+          if [ "${successful_nodes}" != 3 ]; then
+              exit 1
+          fi
+          
+          all_nodes="$(curl -sk -XGET http://127.0.0.1:9200/_nodes/ | \
+            jq '.nodes | values[] | .name' | \
+            jq -s '. |= if . then sort else empty end' | \
+            jq -r '. | values[]' | \
+            paste -sd "," - \
+          )"
+          echo "All nodes: ${all_nodes}"
+          if [ "${all_nodes}" != "cm0,cm1,data1" ]; then
+              exit 1
+          fi
