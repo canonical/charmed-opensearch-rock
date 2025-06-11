@@ -42,7 +42,7 @@ jobs:
       - name: Download rock file
         uses: actions/download-artifact@v4
         with:
-          name: charmed_opensearch_rock_amd64
+          name: opensearch_rock_amd64
           path: .
 
       - name: Login to GitHub Container Registry
@@ -64,16 +64,16 @@ jobs:
           sudo skopeo \
               --insecure-policy \
               copy \
-              oci-archive:charmed-opensearch_${version}_amd64.rock \
-              docker-daemon:ghcr.io/canonical/charmed-opensearch:${major_tag_version}
-          docker push ghcr.io/canonical/charmed-opensearch:${major_tag_version}
+              oci-archive:opensearch_${version}_amd64.rock \
+              docker-daemon:ghcr.io/canonical/opensearch:${major_tag_version}
+          docker push ghcr.io/canonical/opensearch:${major_tag_version}
           
           ### push full version to edge
           tag_version="${version}-${base}_${{ env.RELEASE }}"
-          echo "Publishing charmed-opensearch:${tag_version}"
+          echo "Publishing opensearch:${tag_version}"
           sudo skopeo \
               --insecure-policy \
               copy \
-              oci-archive:charmed-opensearch_${version}_amd64.rock \
-              docker-daemon:ghcr.io/canonical/charmed-opensearch:${tag_version}
-          docker push ghcr.io/canonical/charmed-opensearch:${tag_version}
+              oci-archive:opensearch_${version}_amd64.rock \
+              docker-daemon:ghcr.io/canonical/opensearch:${tag_version}
+          docker push ghcr.io/canonical/opensearch:${tag_version}

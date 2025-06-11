@@ -1,12 +1,12 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
-name: charmed-opensearch # the name of your ROCK
+name: opensearch # the name of your ROCK
 base: ubuntu@24.04 # the base environment for this ROCK
 license: Apache-2.0
 
 version: '2.19.1' # just for humans. Semantic versioning is recommended
 
-summary: 'Charmed OpenSearch ROCK OCI.'
+summary: 'OpenSearch ROCK OCI.'
 description: |
   OpenSearch is a community-driven, Apache 2.0-licensed open source search and 
   analytics suite that makes it easy to ingest, search, visualize, and analyze data. 
