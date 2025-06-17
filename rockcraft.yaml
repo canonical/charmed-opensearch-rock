@@ -1,6 +1,6 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
-name: charmed-opensearch # the name of your ROCK
+name: opensearch # the name of your ROCK
 base: ubuntu@24.04 # the base environment for this ROCK
 license: Apache-2.0
 
@@ -48,7 +48,7 @@ parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - charmed-opensearch/2-24.04/edge/test-snap
+      - opensearch/2/edge
     stage-packages:
       - base-files
       - python3-venv
