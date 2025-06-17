@@ -6,7 +6,7 @@ license: Apache-2.0
 
 version: '2.19.1' # just for humans. Semantic versioning is recommended
 
-summary: 'Charmed OpenSearch ROCK OCI.'
+summary: 'OpenSearch ROCK OCI.'
 description: |
   OpenSearch is a community-driven, Apache 2.0-licensed open source search and 
   analytics suite that makes it easy to ingest, search, visualize, and analyze data. 
@@ -48,7 +48,7 @@ parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - opensearch/2/edge
+      - opensearch/2/edge/dpe-7400
     stage-packages:
       - base-files
       - python3-venv
