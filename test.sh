@@ -9,7 +9,7 @@ container_0_id=$(docker run \
     -e INITIAL_CM_NODES=cm0 \
     -p 9200:9200 \
     --name cm0 \
-    opensearch:"${version}")
+    charmed-opensearch:"${version}")
 container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
 
 # wait a bit for it to fully initialize
@@ -23,7 +23,7 @@ container_1_id=$(docker run \
     -e NODE_ROLES=data,voting_only \
     -p 9201:9200 \
     --name data1 \
-    opensearch:"${version}")
+    charmed-opensearch:"${version}")
 container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
 
 # wait a bit for it to fully initialize
@@ -37,7 +37,7 @@ docker run \
     -e INITIAL_CM_NODES="cm0,cm1" \
     -p 9202:9200 \
     --name cm1 \
-    opensearch:"${version}"
+    charmed-opensearch:"${version}"
 
 # wait a bit for it to fully initialize
 sleep 15s

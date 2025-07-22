@@ -1,12 +1,12 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
-name: opensearch # the name of your ROCK
+name: charmed-opensearch # the name of your ROCK
 base: ubuntu@24.04 # the base environment for this ROCK
 license: Apache-2.0
 
 version: '2.19.2' # just for humans. Semantic versioning is recommended
 
-summary: 'OpenSearch ROCK OCI.'
+summary: 'Charmed OpenSearch ROCK OCI.'
 description: |
   OpenSearch is a community-driven, Apache 2.0-licensed open source search and 
   analytics suite that makes it easy to ingest, search, visualize, and analyze data. 
@@ -48,7 +48,7 @@ parts:
   opensearch-snap:
     plugin: nil
     stage-snaps:
-      - opensearch/2/edge
+      - charmed-opensearch/2/edge
     stage-packages:
       - base-files
       - python3-venv
@@ -70,8 +70,8 @@ parts:
       dpkg-query -f '${db:Status-Abbrev},${binary:Package},${Version},${source:Package},${Source:Version}\n' -W > ${rocks}/dpkg.query
 
       ## for snap packages
-      cp snap.opensearch/manifest.yaml ${rocks}
-      cp snap.opensearch/snapcraft.yaml ${rocks}
+      cp snap.charmed-opensearch/manifest.yaml ${rocks}
+      cp snap.charmed-opensearch/snapcraft.yaml ${rocks}
 
   non-root-user:
     plugin: nil
