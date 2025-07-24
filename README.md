@@ -7,10 +7,10 @@ Developers build solutions for search, data observability, data ingestion and mo
 OpenSearch is offered under the Apache Software Licence, version 2.0.
 
 [Charmed OpenSearch rock](https://github.com/canonical/charmed-opensearch-rock/pkgs/container/charmed-opensearch) 
-is an Open Container Initiative (OCI) image derived from the [Charmed OpenSearch Snap](https://snapcraft.io/opensearch). 
+is an Open Container Initiative (OCI) image derived from the [Charmed OpenSearch Snap](https://snapcraft.io/charmed-opensearch). 
 The tool used to create this rock is called [Rockcraft](https://canonical-rockcraft.readthedocs-hosted.com/en/latest/index.html).
 
-This repository contains the packaging metadata for creating a Charmed OpenSearch rock. This rock image is based on the [OpenSearch Snap](https://github.com/canonical/opensearch-snap)
+This repository contains the packaging metadata for creating a Charmed OpenSearch rock. This rock image is based on the [Charmed OpenSearch Snap](https://github.com/canonical/charmed-opensearch-snap)
 
 For more information on rocks, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
