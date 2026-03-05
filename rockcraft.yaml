@@ -102,8 +102,11 @@ parts:
       # Ensure certificates directory exists with correct permissions
       # This directory is used for TLS certificates (*.p12, chain.pem)
       mkdir -p etc/opensearch/certificates
-      chown -R 584792:584792 etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
-      chmod 750 etc/opensearch/certificates
+      # Mirror with the snap style: https://github.com/canonical/opensearch-snap/blob/2/edge/snap/hooks/install#L79
+      # service user owns the directories/files, group root can also access them when needed.
+      chown -R 584792 etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
+      chgrp -R root etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
+      chmod 770 etc/opensearch/certificates
 
 
   entry:
