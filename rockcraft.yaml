@@ -83,15 +83,9 @@ parts:
     override-prime: |
       craftctl default
 
-      # Ensure _daemon_ user has UID/GID 584792 for Pebble service
-      # Pebble's user field requires a username in /etc/passwd, not just a numeric UID
-      # _daemon_ is the default run_user, so we ensure it has the correct UID to match file ownership
-      # If _daemon_ does not exist or has wrong UID, recreate it with UID 584792
-      if ! id -u _daemon_ >/dev/null 2>&1 || [ "$(id -u _daemon_)" != "584792" ]; then
-        # Remove existing _daemon_ user/group if it has wrong UID
-        userdel _daemon_ 2>/dev/null || true
-        groupdel _daemon_ 2>/dev/null || true
-        # Create _daemon_ with correct UID/GID
+      # Ensure _daemon_ user exists with UID/GID 584792 for Pebble service
+      # Pebble's user field requires a username in /etc/passwd, not just a numeric UID.
+      if ! id -u _daemon_ >/dev/null 2>&1; then
         groupadd -g 584792 _daemon_ || true
         useradd -u 584792 -g 584792 -r -s /bin/false _daemon_ || true
       fi
@@ -102,11 +96,14 @@ parts:
       # Ensure certificates directory exists with correct permissions
       # This directory is used for TLS certificates (*.p12, chain.pem)
       mkdir -p etc/opensearch/certificates
+
       # Mirror with the snap style: https://github.com/canonical/opensearch-snap/blob/2/edge/snap/hooks/install#L79
       # service user owns the directories/files, group root can also access them when needed.
       chown -R 584792 etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
       chgrp -R root etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
-      chmod 770 etc/opensearch/certificates
+      # Minimum permissions: daemon can write, root can traverse/read.
+      # Setgid so files created by _daemon_ inherit group root without needing group-write on the directory.
+      chmod 2750 etc/opensearch/certificates
 
 
   entry:
