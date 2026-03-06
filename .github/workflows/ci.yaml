@@ -123,7 +123,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Download rock filehas_duplicate_env
+      - name: Download rock file
         uses: actions/download-artifact@v4
         with:
           name: opensearch_rock_amd64
