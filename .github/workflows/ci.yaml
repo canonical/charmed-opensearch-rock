@@ -84,6 +84,8 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'MEDIUM,HIGH,CRITICAL'
+          # Pin to post-incident release (Trivy 2026-03-01; releases 0.27.0-0.69.1 were deleted)
+          version: 'v0.69.3'
           # helps avoid GitHub API rate limits
           github-pat: ${{ secrets.GITHUB_TOKEN }}
 
@@ -103,6 +105,8 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
           severity: "MEDIUM,HIGH,CRITICAL"
           scanners: "vuln"
+          # Pin to post-incident release (Trivy 2026-03-01)
+          version: 'v0.69.3'
       
       - name: Upload trivy report as a Github artifact
         uses: actions/upload-artifact@v4
