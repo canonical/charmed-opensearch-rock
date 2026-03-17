@@ -84,9 +84,11 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'MEDIUM,HIGH,CRITICAL'
+          # Pin to post-incident release (Trivy 2026-03-01)
+          version: 'v0.69.3'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -101,6 +103,8 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
           severity: "MEDIUM,HIGH,CRITICAL"
           scanners: "vuln"
+          # Pin to post-incident release (Trivy 2026-03-01)
+          version: 'v0.69.3'
       
       - name: Upload trivy report as a Github artifact
         uses: actions/upload-artifact@v4
