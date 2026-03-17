@@ -18,6 +18,52 @@ function set_yaml_prop() {
     /usr/bin/python3 /usr/bin/set_conf.py --file "${target_file}" --key "${key}" --value "${value}"
 }
 
+function ensure_editable_cacerts_trust_store() {
+    # Create a writable PKCS12 truststore derived from the JDK's read-only cacerts.
+    # this comes from https://github.com/canonical/opensearch-snap/blob/2/edge/snap/hooks/install#L55
+    local dest="${OPENSEARCH_PATH_CERTS}/cacert.p12"
+    local jvm_opts="${OPENSEARCH_PATH_CONF}/jvm.options"
+
+    if [ ! -f "${dest}" ]; then
+        local src=""
+        if [ -f "/etc/ssl/certs/java/cacerts" ]; then
+            src="/etc/ssl/certs/java/cacerts"
+        elif [ -n "${JAVA_HOME:-}" ] && [ -f "${JAVA_HOME}/lib/security/cacerts" ]; then
+            src="${JAVA_HOME}/lib/security/cacerts"
+        fi
+
+        local keytool=""
+        if [ -n "${JAVA_HOME:-}" ] && [ -x "${JAVA_HOME}/bin/keytool" ]; then
+            keytool="${JAVA_HOME}/bin/keytool"
+        elif command -v keytool >/dev/null 2>&1; then
+            keytool="$(command -v keytool)"
+        fi
+
+        if [ -n "${src}" ] && [ -n "${keytool}" ]; then
+            "${keytool}" \
+                -importkeystore \
+                -srckeystore "${src}" \
+                -destkeystore "${dest}" \
+                -srcstoretype JKS \
+                -deststoretype PKCS12 \
+                -srcstorepass changeit \
+                -deststorepass changeit \
+                -noprompt
+            # keep this truststore editable by both daemon and root (group).
+            chmod 660 "${dest}" || true
+        else
+            echo "Skipping cacert.p12 generation: missing source cacerts or keytool" >&2
+        fi
+    fi
+
+    if [ -f "${jvm_opts}" ]; then
+        grep -q "javax.net.ssl.trustStore=.*cacert.p12" "${jvm_opts}" \
+            || echo "-Djavax.net.ssl.trustStore=${dest}" >> "${jvm_opts}"
+        grep -q "javax.net.ssl.trustStorePassword=changeit" "${jvm_opts}" \
+            || echo "-Djavax.net.ssl.trustStorePassword=changeit" >> "${jvm_opts}"
+    fi
+}
+
 function network_host() {
     echo "[ \"_site_\", \"$(hostname -i)\" ]"
 }
@@ -70,6 +116,8 @@ function seed_hosts() {
 
 
 conf="${OPENSEARCH_PATH_CONF}/opensearch.yml"
+
+ensure_editable_cacerts_trust_store
 
 set_yaml_prop "${conf}" "cluster.name" "${CLUSTER_NAME}"
 set_yaml_prop "${conf}" "node.name" "${NODE_NAME}"
