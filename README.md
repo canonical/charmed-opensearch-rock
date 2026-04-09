@@ -42,7 +42,6 @@ cd opensearch-rock
 sudo snap install rockcraft --edge --classic
 sudo snap install docker
 sudo snap install lxd
-sudo snap install skopeo --edge --devmode
 ```
 #### Configuring Prerequisites
 ```bash
@@ -56,7 +55,7 @@ rockcraft pack
 
 version="$(cat rockcraft.yaml | yq .version)"
 
-sudo skopeo --insecure-policy \
+rockcraft.skopeo --insecure-policy \
   copy \
   oci-archive:opensearch_"${version}"_amd64.rock \
   docker-daemon:opensearch:"${version}"
