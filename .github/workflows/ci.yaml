@@ -56,22 +56,19 @@ jobs:
 
       - name: Install required dependencies
         run: |
-          # docker
-          # FIXME: v27.2.0 reports "...client version 1.22 is too old..." when trying to copy the
-          # rock to the local repository --revision=2932
-          sudo snap install docker --channel=latest/stable --revision=2932
-          sudo addgroup --system docker; sudo adduser $USER docker
+          sudo snap install rockcraft --classic --edge
+          sudo snap install docker
+          sudo addgroup --system docker
+          sudo adduser $USER docker
           newgrp docker
-          sudo snap disable docker; sudo snap enable docker
-          # skopeo
-          sudo snap install --devmode --channel edge skopeo
+
           sudo snap install yq
 
       - name: Create local image
         run: |
           version="$(cat rockcraft.yaml | yq .version)"
 
-          sudo skopeo \
+          rockcraft.skopeo \
               --insecure-policy \
               copy \
               oci-archive:charmed-opensearch_${version}_amd64.rock \
@@ -84,6 +81,8 @@ jobs:
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "MEDIUM,HIGH,CRITICAL"
+          # Pin to post-incident release (Trivy 2026-03-01)
+          version: "v0.69.3"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -101,6 +100,8 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
           severity: "MEDIUM,HIGH,CRITICAL"
           scanners: "vuln"
+          # Pin to post-incident release (Trivy 2026-03-01)
+          version: "v0.69.3"
 
       - name: Upload trivy report as a Github artifact
         uses: actions/upload-artifact@v4
@@ -127,23 +128,19 @@ jobs:
 
       - name: Install required dependencies
         run: |
-          # docker
-          # FIXME: v27.2.0 reports "...client version 1.22 is too old..." when trying to copy the
-          # rock to the local repository --revision=2932
-          sudo snap install docker --channel=latest/stable --revision=2932
-          sudo addgroup --system docker; sudo adduser $USER docker
+          sudo snap install rockcraft --classic --edge
+          sudo snap install docker
+          sudo addgroup --system docker
+          sudo adduser $USER docker
           newgrp docker
-          sudo snap disable docker; sudo snap enable docker
 
-          # skopeo
-          sudo snap install --devmode --channel edge skopeo
           sudo snap install yq
 
       - name: Create local image
         run: |
           version="$(cat rockcraft.yaml | yq .version)"
 
-          sudo skopeo \
+          rockcraft.skopeo \
               --insecure-policy \
               copy \
               oci-archive:charmed-opensearch_${version}_amd64.rock \
@@ -166,8 +163,8 @@ jobs:
               -e INITIAL_CM_NODES=cm0 \
               -p 9200:9200 \
               --name cm0 \
-              charmed-opensearch:"${version}")
-          container_0_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_0_id}")
+              opensearch:"${version}")
+          container_0_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${container_0_id}")
 
           # wait a bit for it to fully initialize
           sleep 30s
@@ -180,8 +177,8 @@ jobs:
               -e NODE_ROLES=data,voting_only \
               -p 9201:9200 \
               --name data1 \
-              charmed-opensearch:"${version}")
-          container_1_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_1_id}")
+              opensearch:"${version}")
+          container_1_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${container_1_id}")
 
           # wait a bit for it to fully initialize
           sleep 30s
@@ -194,8 +191,8 @@ jobs:
               -e INITIAL_CM_NODES="cm0,cm1" \
               -p 9202:9200 \
               --name cm1 \
-              charmed-opensearch:"${version}")
-          container_2_ip=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' "${container_2_id}")
+              opensearch:"${version}")
+          container_2_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${container_2_id}")
 
           # wait a bit for it to fully initialize
           sleep 30s

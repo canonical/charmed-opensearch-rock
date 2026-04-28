@@ -92,18 +92,61 @@ parts:
 
       # Give permission at the required folders
       mkdir -p var/lib/opensearch usr/share/tmp var/log/opensearch
-      
-      # Ensure certificates directory exists with correct permissions
-      # This directory is used for TLS certificates (*.p12, chain.pem)
       mkdir -p etc/opensearch/certificates
+      install -d -o 584792 -g 584792 -m 770 \
+          etc/opensearch \
+          opt/opensearch \
+          usr/share/opensearch \
+          var/lib/opensearch \
+          usr/share/tmp \
+          var/log/opensearch \
+          etc/opensearch/certificates
 
-      # Mirror with the snap style: https://github.com/canonical/opensearch-snap/blob/2/edge/snap/hooks/install#L79
-      # service user owns the directories/files, group root can also access them when needed.
-      chown -R 584792 etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
-      chgrp -R root etc/opensearch opt/opensearch usr/share/opensearch var/lib/opensearch usr/share/tmp var/log/opensearch
-      # Minimum permissions: daemon can write, root can traverse/read.
-      # Setgid so files created by _daemon_ inherit group root without needing group-write on the directory.
-      chmod 2750 etc/opensearch/certificates
+      # Ensure certificates directory exists with correct permissions
+      dest="etc/opensearch/certificates/cacerts.p12"
+      jvm_opts="etc/opensearch/jvm.options"
+
+      if [ ! -f "etc/opensearch/certificates/cacerts.p12" ]; then
+          src=""
+          if [ -f "etc/ssl/certs/java/cacerts" ]; then
+              src="etc/ssl/certs/java/cacerts"
+          elif [ -f "usr/lib/jvm/java-21-openjdk-amd64/lib/security/cacerts" ]; then
+              src="usr/lib/jvm/java-21-openjdk-amd64/lib/security/cacerts"
+          fi
+
+          keytool=""
+          if [ -x "usr/lib/jvm/java-21-openjdk-amd64/bin/keytool" ]; then
+              keytool="usr/lib/jvm/java-21-openjdk-amd64/bin/keytool"
+          elif command -v keytool >/dev/null 2>&1; then
+              keytool="$(command -v keytool)"
+          fi
+
+          if [ -n "${src}" ] && [ -n "${keytool}" ]; then
+              "${keytool}" \
+                  -importkeystore \
+                  -srckeystore "${src}" \
+                  -destkeystore "${dest}" \
+                  -srcstoretype JKS \
+                  -deststoretype PKCS12 \
+                  -srcstorepass changeit \
+                  -deststorepass changeit \
+                  -noprompt
+
+              chmod 660 "${dest}"
+              
+          else
+              echo "Skipping cacerts.p12 generation: missing source cacerts or keytool" >&2
+          fi
+      fi
+
+      if [ -f "${jvm_opts}" ]; then
+          grep -q "javax.net.ssl.trustStore=.*cacerts.p12" "${jvm_opts}" \
+              || echo "-Djavax.net.ssl.trustStore=${dest}" >> "${jvm_opts}"
+          grep -q "javax.net.ssl.trustStorePassword=changeit" "${jvm_opts}" \
+              || echo "-Djavax.net.ssl.trustStorePassword=changeit" >> "${jvm_opts}"
+      fi
+      # Set ownership for the configuration directory
+      chown -R 584792:584792 etc/opensearch/
 
 
   entry:
