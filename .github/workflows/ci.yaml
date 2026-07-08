@@ -7,6 +7,7 @@ concurrency:
 on:
   workflow_call:
   pull_request:
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -35,8 +36,8 @@ jobs:
       - name: Upload built rock job artifact
         uses: actions/upload-artifact@v4
         with:
-          name: opensearch_rock_amd64
-          path: "opensearch_*.rock"
+          name: charmed_opensearch_rock_amd64
+          path: "charmed-opensearch_*.rock"
 
   scan:
     name: Trivy scan and sbom generation
@@ -52,7 +53,7 @@ jobs:
       - name: Download rock file
         uses: actions/download-artifact@v4
         with:
-          name: opensearch_rock_amd64
+          name: charmed_opensearch_rock_amd64
           path: .
 
       - name: Install required dependencies
@@ -72,13 +73,13 @@ jobs:
           rockcraft.skopeo \
               --insecure-policy \
               copy \
-              oci-archive:opensearch_${version}_amd64.rock \
-              docker-daemon:trivy/opensearch_rock_amd64:test
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:trivy/charmed_opensearch_rock_amd64:test
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: "trivy/opensearch_rock_amd64:test"
+          image-ref: "trivy/charmed_opensearch_rock_amd64:test"
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "MEDIUM,HIGH,CRITICAL"
@@ -96,7 +97,7 @@ jobs:
           scan-type: "image"
           format: "spdx-json"
           output: "dependency-results.sbom.json"
-          image-ref: "trivy/opensearch_rock_amd64:test"
+          image-ref: "trivy/charmed_opensearch_rock_amd64:test"
           github-pat: ${{ secrets.GITHUB_TOKEN }}
           severity: "MEDIUM,HIGH,CRITICAL"
           scanners: "vuln"
@@ -122,7 +123,7 @@ jobs:
       - name: Download rock file
         uses: actions/download-artifact@v4
         with:
-          name: opensearch_rock_amd64
+          name: charmed_opensearch_rock_amd64
           path: .
 
       - name: Install required dependencies
@@ -142,8 +143,8 @@ jobs:
           rockcraft.skopeo \
               --insecure-policy \
               copy \
-              oci-archive:opensearch_${version}_amd64.rock \
-              docker-daemon:opensearch:${version}
+              oci-archive:charmed-opensearch_${version}_amd64.rock \
+              docker-daemon:charmed-opensearch:${version}
 
       - name: Setup the required system configs
         run: |
@@ -162,7 +163,7 @@ jobs:
               -e INITIAL_CM_NODES=cm0 \
               -p 9200:9200 \
               --name cm0 \
-              opensearch:"${version}")
+              charmed-opensearch:"${version}")
           container_0_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${container_0_id}")
 
           # wait a bit for it to fully initialize
@@ -176,7 +177,7 @@ jobs:
               -e NODE_ROLES=data,voting_only \
               -p 9201:9200 \
               --name data1 \
-              opensearch:"${version}")
+              charmed-opensearch:"${version}")
           container_1_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${container_1_id}")
 
           # wait a bit for it to fully initialize
@@ -190,7 +191,7 @@ jobs:
               -e INITIAL_CM_NODES="cm0,cm1" \
               -p 9202:9200 \
               --name cm1 \
-              opensearch:"${version}")
+              charmed-opensearch:"${version}")
           container_2_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${container_2_id}")
 
           # wait a bit for it to fully initialize
