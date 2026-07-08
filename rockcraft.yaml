@@ -4,7 +4,7 @@ name: charmed-opensearch # the name of your ROCK
 base: ubuntu@24.04 # the base environment for this ROCK
 license: Apache-2.0
 
-version: "2.19.4" # just for humans. Semantic versioning is recommended
+version: "2.19.5" # just for humans. Semantic versioning is recommended
 
 summary: 'Charmed OpenSearch ROCK OCI.'
 description: |
@@ -55,6 +55,7 @@ parts:
       - python3-venv
       - python3-yaml
       - curl
+      - lsof
       - util-linux
     override-prime: |
       craftctl default
